@@ -5,6 +5,7 @@ import sys
 from playwright.sync_api import sync_playwright
 
 WAKE_BUTTON_TEXTS = ["get this app back up", "app back up", "Wake up"]
+SLEEP_SCREEN_TEXTS = ["gone to sleep", "Zzzz"]
 
 
 def visit(page, url):
@@ -19,6 +20,13 @@ def visit(page, url):
             button.first.click()
             page.wait_for_timeout(60_000)
             break
+
+    # 다 기다린 뒤에도 휴면 화면 문구가 남아 있으면 실패로 계산한다.
+    # 조용한 거짓 성공을 막아야 GitHub이 실패 메일로 고장을 알려 준다.
+    for text in WAKE_BUTTON_TEXTS + SLEEP_SCREEN_TEXTS:
+        if page.get_by_text(text, exact=False).count() > 0:
+            raise RuntimeError(f"휴면 화면이 그대로임 (감지 문구: {text})")
+
     print("  방문 완료")
 
 
