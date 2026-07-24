@@ -28,8 +28,12 @@
 `SUPABASE_PINGS` 시크릿을 만들고, 한 줄에 하나씩 다음 형식으로 넣습니다.
 
 ```
-프로젝트별명|https://xxxx.supabase.co|publishable키
+프로젝트별명|https://xxxx.supabase.co|publishable키|아무_테이블이름
 ```
+
+테이블 이름이 필요한 이유: 새 API 키 체계에서 `/rest/v1/` 루트는 secret 키 전용이라,
+공개용 키로는 실제 테이블을 1행 조회해야 사용 기록이 남습니다. 그 프로젝트에 실제로
+있는 테이블 아무거나 하나 적으면 되고, RLS로 잠겨 있어도 괜찮습니다 (요청만 집계되면 됨).
 
 ### 바로 시험하기
 Actions 탭 → **caretaker** → **Run workflow** 버튼으로 즉시 실행해 볼 수 있습니다.

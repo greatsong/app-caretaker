@@ -26,7 +26,7 @@ jobs:
     name: Supabase 살려두기
     runs-on: ubuntu-latest
     steps:
-      - name: REST 요청 한 번으로 사용 기록 남기기
+      - name: 테이블 1행 조회로 사용 기록 남기기
         env:
           SUPABASE_PINGS: ${{ secrets.SUPABASE_PINGS }}
         run: |
@@ -34,10 +34,13 @@ jobs:
             echo "등록된 Supabase 프로젝트 없음 — 통과"
             exit 0
           fi
+          # 새 API 키 체계에서 /rest/v1/ 루트는 secret 키 전용이라,
+          # 공개용(publishable/anon) 키로 실제 테이블을 1행 조회해 활동을 남긴다.
+          # RLS로 행이 안 보여도 요청 자체는 200으로 집계된다.
           fail=0
-          while IFS='|' read -r name url key; do
+          while IFS='|' read -r name url key table; do
             [ -z "$url" ] && continue
-            code=$(curl -s -o /dev/null -w "%{http_code}" "$url/rest/v1/" -H "apikey: $key")
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$url/rest/v1/${table}?select=*&limit=1" -H "apikey: $key")
             echo "$name: HTTP $code"
             [ "$code" = "200" ] || fail=1
           done <<< "$SUPABASE_PINGS"
