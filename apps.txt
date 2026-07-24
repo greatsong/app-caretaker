@@ -1,3 +1,4 @@
 # 깨워 둘 스트림릿 앱 주소 — 한 줄에 하나 (# 줄은 무시)
 # 예시:
 # https://my-app.streamlit.app
+https://pop-kr.streamlit.app
