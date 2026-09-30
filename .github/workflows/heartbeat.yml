@@ -1,0 +1,28 @@
+name: heartbeat
+
+# GitHub은 공개 리포에서 60일간 활동이 없으면 스케줄 워크플로우를 자동으로 끈다.
+# 2026-09-22에 caretaker가 이 규칙으로 꺼져 curriculum-weaver의 Supabase가 pause됐다.
+# 매달 1일 HEARTBEAT 파일에 날짜를 기록하고 커밋해 리포 활동을 남긴다.
+
+on:
+  schedule:
+    - cron: "17 0 1 * *"   # 매달 1일 09:17 KST (UTC 00:17)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  beat:
+    name: 리포 활동 기록
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: HEARTBEAT 갱신 후 커밋
+        run: |
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > HEARTBEAT
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add HEARTBEAT
+          git commit -m "heartbeat: $(date -u +%Y-%m-%d)"
+          git push
