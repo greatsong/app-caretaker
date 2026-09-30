@@ -29,6 +29,8 @@ jobs:
       - name: 테이블 1행 조회로 사용 기록 남기기
         env:
           SUPABASE_PINGS: ${{ secrets.SUPABASE_PINGS }}
+          # 더 이상 살려 둘 필요가 없는 프로젝트 별명 (공백 구분). 시크릿은 그대로 두고 여기서 건너뛴다.
+          SUPABASE_SKIP: "snu-gallery danggok-gallery"
         run: |
           if [ -z "$SUPABASE_PINGS" ]; then
             echo "등록된 Supabase 프로젝트 없음 — 통과"
@@ -40,6 +42,7 @@ jobs:
           fail=0
           while IFS='|' read -r name url key table; do
             [ -z "$url" ] && continue
+            case " $SUPABASE_SKIP " in *" $name "*) echo "$name: 건너뜀"; continue ;; esac
             code=$(curl -s -o /dev/null -w "%{http_code}" "$url/rest/v1/${table}?select=*&limit=1" -H "apikey: $key")
             echo "$name: HTTP $code"
             [ "$code" = "200" ] || fail=1
