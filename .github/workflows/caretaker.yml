@@ -43,7 +43,8 @@ jobs:
           while IFS='|' read -r name url key table; do
             [ -z "$url" ] && continue
             case " $SUPABASE_SKIP " in *" $name "*) echo "$name: 건너뜀"; continue ;; esac
-            code=$(curl -s -o /dev/null -w "%{http_code}" "$url/rest/v1/${table}?select=*&limit=1" -H "apikey: $key")
+            # 일시적 네트워크 오류에 대비해 재시도하고, curl이 실패해도(bash -e) 나머지 항목은 계속 확인한다
+            code=$(curl -s --retry 3 --retry-all-errors --max-time 30 -o /dev/null -w "%{http_code}" "$url/rest/v1/${table}?select=*&limit=1" -H "apikey: $key") || code="${code:-000}"
             echo "$name: HTTP $code"
             [ "$code" = "200" ] || fail=1
           done <<< "$SUPABASE_PINGS"
